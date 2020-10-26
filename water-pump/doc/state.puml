@@ -1,0 +1,15 @@
+@startuml
+[*] --> Stop
+Start: Pump is running
+Stop: Pump stopped
+Manual: Check state
+Stop --> Start : Low pressure
+Start --> Stop : High pressure
+Start --> Manual : High temp SSR
+Start --> Manual : High temp PUMP
+Start --> Manual : Long time on
+Manual --> Stop : Confirmation
+note on link
+  Manual button
+end note
+@enduml

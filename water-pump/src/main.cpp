@@ -5,6 +5,12 @@
 // Display
 #include <Wire.h>
 #include <U8g2lib.h>
+// Pump control
+#include "PumpControl.h"
+
+#define PRESSURE_SENSOR_PIN 3
+#define PUMP_CONTROL_PIN 4
+#define CONFIRM_BUTTON_PIN 2
 
 // Data wire is plugged into port 2 on the Arduino
 #define ONE_WIRE_BUS 5
@@ -18,6 +24,9 @@ DallasTemperature sensors(&oneWire);
 
 // SSD1306 Display
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+
+// Pump control class
+PumpControl pump(sensors, PUMP_CONTROL_PIN, CONFIRM_BUTTON_PIN);
 
 void setup() 
 {
@@ -67,6 +76,7 @@ void drawText(float temp1, float temp2)
 
 }
 
+unsigned long counter1sec;
 void loop() 
 {
   if (millis() % 10000 == 0)
@@ -76,5 +86,12 @@ void loop()
     Serial.print("Temp2: "); Serial.println(sensors.getTempCByIndex(1));
 
     drawText(sensors.getTempCByIndex(0), sensors.getTempCByIndex(1));
+  }
+
+  if (millis() - counter1sec > 1000)
+  {
+    counter1sec = millis();
+    bool lowPressure = digitalRead(PRESSURE_SENSOR_PIN) == LOW ? true : false;
+    pump.CheckStateLoop(lowPressure);
   }
 }
