@@ -19,4 +19,9 @@ class PumpControl
         bool CheckTemperature();
         bool CheckRuntime();
         bool ConfirmButtonPressed();
+
+        unsigned long m_startTime;
+        String m_message;
+
+        static unsigned long MAX_RUNTIME;
 };

@@ -1,10 +1,15 @@
 #include "PumpControl.h"
 
+// Maximum run time of the pump: 5 minutes 
+unsigned long PumpControl::MAX_RUNTIME = 5ul * 60 * 1000;
+
 PumpControl::PumpControl(DallasTemperature& tempSensors, uint8_t pump_pin, uint8_t button_pin) : 
     m_state(PumpControl::PumpState::STOP), m_sensors(tempSensors), m_pump_control_pin(pump_pin),
     m_confirm_button_pin(button_pin)
 {
-
+    pinMode(m_pump_control_pin, OUTPUT);
+    pinMode(m_confirm_button_pin, INPUT_PULLUP);
+    
 }
 
 void PumpControl::CheckStateLoop(bool lowPressure)
@@ -46,11 +51,16 @@ void PumpControl::CheckStateLoop(bool lowPressure)
 void PumpControl::StartPump()
 {
     digitalWrite(m_pump_control_pin, HIGH);
+    m_startTime = millis();
 }
 
 void PumpControl::StopPump()
 {
     digitalWrite(m_pump_control_pin, LOW);
+    
+    Serial.print("Runtime: "); 
+    Serial.print((millis() - m_startTime) / 1000);
+    Serial.println(" s");
 }
 
 bool PumpControl::CheckSensors()
@@ -73,6 +83,11 @@ bool PumpControl::CheckTemperature()
 
 bool PumpControl::CheckRuntime()
 {
+    if (millis() - m_startTime > MAX_RUNTIME)
+    {
+        m_message = "Max. runtime";
+        return false;
+    }
     return true;
 }
 
