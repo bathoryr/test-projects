@@ -31,6 +31,8 @@ PumpControl pump(sensors, PUMP_CONTROL_PIN, CONFIRM_BUTTON_PIN);
 void setup() 
 {
   Serial.begin(9600);
+  pump.Initialize();
+  pinMode(PRESSURE_SENSOR_PIN, INPUT_PULLUP);
 
   // Start up the library
   sensors.begin();
@@ -76,9 +78,37 @@ void drawText(float temp1, float temp2)
 
 }
 
+void displayStatus(PumpControl::PumpState status)
+{
+  float pumpTemp = pump.GetPumpTemp();
+  u8g2.firstPage();
+  do
+  {
+    u8g2.setFont(u8g2_font_9x15B_tr);
+    u8g2.setCursor(0, 15);
+    u8g2.print(pump.GetStateText());
+    u8g2.setFont(u8g2_font_6x10_tr);
+    if (status == PumpControl::PumpState::MANUAL_STOP)
+    {
+      u8g2.drawStr(0, 25, pump.GetErrorMsg().c_str());
+    }
+    else
+    {
+      String msg {"Last runtime: "};
+      msg.concat(pump.GetLastRuntime());
+      u8g2.drawStr(0, 25, msg.c_str());
+      msg = "Pump temp.: ";
+      msg.concat(pumpTemp);
+      u8g2.drawStr(0, 35, msg.c_str());
+    }
+  } while (u8g2.nextPage());
+}
+
+PumpControl::PumpState lasteState = PumpControl::PumpState::NOT_INITIALIZED;
 unsigned long counter1sec;
 void loop() 
 {
+  /*
   if (millis() % 10000 == 0)
   {
     sensors.requestTemperatures();
@@ -87,11 +117,17 @@ void loop()
 
     drawText(sensors.getTempCByIndex(0), sensors.getTempCByIndex(1));
   }
-
+  */
   if (millis() - counter1sec > 1000)
   {
     counter1sec = millis();
     bool lowPressure = digitalRead(PRESSURE_SENSOR_PIN) == LOW ? true : false;
     pump.CheckStateLoop(lowPressure);
+    auto state = pump.GetState();
+    if (state != lasteState)
+    {
+      lasteState = state;
+    }
+      displayStatus(state);
   }
 }
