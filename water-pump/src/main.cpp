@@ -88,7 +88,7 @@ void displayStatus(PumpControl::PumpState status)
     u8g2.setCursor(0, 15);
     u8g2.print(pump.GetStateText());
     u8g2.setFont(u8g2_font_6x10_tr);
-    if (status == PumpControl::PumpState::MANUAL_STOP)
+    if (status == PumpControl::PumpState::MANUAL_STOP || status == PumpControl::PumpState::NOT_INITIALIZED)
     {
       u8g2.drawStr(0, 25, pump.GetErrorMsg().c_str());
     }
@@ -104,30 +104,16 @@ void displayStatus(PumpControl::PumpState status)
   } while (u8g2.nextPage());
 }
 
-PumpControl::PumpState lasteState = PumpControl::PumpState::NOT_INITIALIZED;
 unsigned long counter1sec;
+
 void loop() 
 {
-  /*
-  if (millis() % 10000 == 0)
-  {
-    sensors.requestTemperatures();
-    Serial.print("Temp1: "); Serial.println(sensors.getTempCByIndex(0));
-    Serial.print("Temp2: "); Serial.println(sensors.getTempCByIndex(1));
-
-    drawText(sensors.getTempCByIndex(0), sensors.getTempCByIndex(1));
-  }
-  */
   if (millis() - counter1sec > 1000)
   {
     counter1sec = millis();
     bool lowPressure = digitalRead(PRESSURE_SENSOR_PIN) == LOW ? true : false;
     pump.CheckStateLoop(lowPressure);
     auto state = pump.GetState();
-    if (state != lasteState)
-    {
-      lasteState = state;
-    }
-      displayStatus(state);
+    displayStatus(state);
   }
 }

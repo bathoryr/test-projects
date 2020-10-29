@@ -18,11 +18,11 @@ void PumpControl::Initialize()
 {
     pinMode(m_pump_control_pin, OUTPUT);
     pinMode(m_confirm_button_pin, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(m_confirm_button_pin), ConfirmButtonPress, FALLING);
-    m_state = PumpState::STOP;
+    // attachInterrupt(digitalPinToInterrupt(m_confirm_button_pin), ConfirmButtonPress_ISR, FALLING);
+    m_state = PumpState::READY;
 }
 
-void PumpControl::ConfirmButtonPress()
+void PumpControl::ConfirmButtonPress_ISR()
 {
     m_confirm_btn_pressed = true;
 }
@@ -31,7 +31,7 @@ void PumpControl::CheckStateLoop(bool lowPressure)
 {
     switch (m_state)
     {
-        case PumpState::STOP:
+        case PumpState::READY:
             if (lowPressure)
             {
                 if (CheckSensors())
@@ -41,7 +41,7 @@ void PumpControl::CheckStateLoop(bool lowPressure)
                 }
                 else
                 {
-                    m_state = PumpState::MANUAL_STOP;
+                    SetManualState();
                 }
             }
             break;
@@ -49,28 +49,39 @@ void PumpControl::CheckStateLoop(bool lowPressure)
             if (lowPressure == false)
             {
                 StopPump();
-                m_state = PumpState::STOP;
+                m_state = PumpState::READY;
                 break;
             }
             if (CheckTemperature() == false || CheckRuntime() == false)
             {
                 StopPump();
-                m_state = PumpState::MANUAL_STOP;
+                SetManualState();
             }
-                m_lastRuntime = (millis() - m_startTime) / 1000;
-                break;
+            break;
         case PumpState::MANUAL_STOP:
-            if (ConfirmButtonPressed())
+            if (CheckButtonPressed())
             {
                 m_confirm_btn_pressed = false;
-                m_state = PumpState::STOP;
+                SetReadyState();
             }
             break;
         case PumpState::NOT_INITIALIZED:
-            while(1)
-                ;
+            m_message = "Not initialized";
+            Serial.print(m_message);
             break;
     }
+}
+
+void PumpControl::SetManualState()
+{
+    attachInterrupt(digitalPinToInterrupt(m_confirm_button_pin), ConfirmButtonPress_ISR, FALLING);
+    m_state = PumpState::MANUAL_STOP;
+}
+
+void PumpControl::SetReadyState()
+{
+    detachInterrupt(digitalPinToInterrupt(m_confirm_button_pin));
+    m_state = PumpState::READY;
 }
 
 void PumpControl::StartPump()
@@ -82,10 +93,6 @@ void PumpControl::StartPump()
 void PumpControl::StopPump()
 {
     digitalWrite(m_pump_control_pin, LOW);
-    
-    Serial.print("Runtime: "); 
-    Serial.print((millis() - m_startTime) / 1000);
-    Serial.println(" s");
 }
 
 bool PumpControl::CheckSensors()
@@ -110,7 +117,7 @@ bool PumpControl::CheckTemperature()
     m_sensors.requestTemperatures();
     if (m_sensors.getTempCByIndex(SENSOR_PUMP_ID) > MAX_TEMP_PUMP)
     {
-        m_message = "Pump temp.: ";
+        m_message = F("Pump temp.: ");
         m_message.concat(m_sensors.getTempCByIndex(SENSOR_PUMP_ID));
         result = false;
     }
@@ -125,30 +132,32 @@ bool PumpControl::CheckTemperature()
 
 bool PumpControl::CheckRuntime()
 {
+    m_lastRuntime = (millis() - m_startTime) / 1000;
     if (millis() - m_startTime > MAX_RUNTIME)
     {
-        m_message = "Max. runtime";
+        m_message = F("Max. runtime: ");
+        m_message.concat(m_lastRuntime);
         return false;
     }
     return true;
 }
 
-bool PumpControl::ConfirmButtonPressed()
+bool PumpControl::CheckButtonPressed()
 {
     return m_confirm_btn_pressed;
 }
 
-PumpControl::PumpState PumpControl::GetState()
+PumpControl::PumpState PumpControl::GetState() const
 {
     return m_state;
 }
 
-String PumpControl::GetStateText()
+String PumpControl::GetStateText() const
 {
     String result;
     switch (m_state)
     {
-    case PumpState::STOP: 
+    case PumpState::READY: 
         result = "READY";
         break;
     case PumpState::START:
@@ -168,12 +177,12 @@ String& PumpControl::GetErrorMsg()
     return m_message;
 }
 
-uint16_t PumpControl::GetLastRuntime()
+uint16_t PumpControl::GetLastRuntime() const
 {
     return m_lastRuntime;
 }
 
-float PumpControl::GetPumpTemp()
+float PumpControl::GetPumpTemp() const
 {
     m_sensors.requestTemperaturesByIndex(SENSOR_PUMP_ID);
     return m_sensors.getTempCByIndex(SENSOR_PUMP_ID);
