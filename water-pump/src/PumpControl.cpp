@@ -27,7 +27,7 @@ void PumpControl::ConfirmButtonPress_ISR()
     m_confirm_btn_pressed = true;
 }
 
-void PumpControl::CheckStateLoop(bool lowPressure)
+PumpControl::PumpState PumpControl::CheckStateLoop(bool lowPressure)
 {
     switch (m_state)
     {
@@ -70,6 +70,7 @@ void PumpControl::CheckStateLoop(bool lowPressure)
             Serial.print(m_message);
             break;
     }
+    return m_state;
 }
 
 void PumpControl::SetManualState()

@@ -30,24 +30,21 @@ PumpControl pump(sensors, PUMP_CONTROL_PIN, CONFIRM_BUTTON_PIN);
 
 void setup() 
 {
-  Serial.begin(9600);
   pump.Initialize();
   pinMode(PRESSURE_SENSOR_PIN, INPUT_PULLUP);
 
   // Start up the library
   sensors.begin();
+	sensors.setResolution(TEMPERATURE_PRECISION);
 
   // locate devices on the bus
-  Serial.print("Locating devices...");
-  Serial.print("Found ");
-  Serial.print(sensors.getDeviceCount(), DEC);
-  Serial.println(" devices.");
+  char msgTemp[24];
+  snprintf(msgTemp, 24, "Found %d TS devices", sensors.getDeviceCount());
 
   // report parasite power requirements
-  Serial.print("Parasite power is: ");
-  if (sensors.isParasitePowerMode()) Serial.println("ON");
-  else Serial.println("OFF");
-
+  char msgPower[24];
+  snprintf(msgPower, 24, "Parasite power is: %s", sensors.isParasitePowerMode() ? "ON" : "OFF");
+  
   // Display init
   if (u8g2.begin())
   {
@@ -56,37 +53,26 @@ void setup()
     do
     {
       u8g2.setFont(u8g2_font_6x10_tr);
-      u8g2.setCursor(0, 10);
-      u8g2.print("Init: "); u8g2.print(u8g2.getDisplayWidth()); u8g2.print(" x "); u8g2.println(u8g2.getDisplayHeight());
+      u8g2.drawStr(0, 10, msgTemp);
+      u8g2.drawStr(0, 20, msgPower);
     } while (u8g2.nextPage());
-
-    Serial.print("Init: "); Serial.print(u8g2.getDisplayWidth()); Serial.print(" x "); Serial.println(u8g2.getDisplayHeight());
+    delay(1000);
   }
-}
-
-void drawText(float temp1, float temp2)
-{
-  u8g2.firstPage();
-  do
-  {
-    u8g2.setFont(u8g2_font_6x10_tr);
-    u8g2.setCursor(0, 10);
-    u8g2.print("Temperature1: "); u8g2.print(temp1); 
-    u8g2.setCursor(0, 20);
-    u8g2.print("Temperature2: "); u8g2.print(temp2);
-  } while (u8g2.nextPage());
-
 }
 
 void displayStatus(PumpControl::PumpState status)
 {
-  float pumpTemp = pump.GetPumpTemp();
+  char msgTime[24], msgTemp[20];
+  snprintf(msgTime, 24, "Last runtime: %02d:%02d", pump.GetLastRuntime() / 60, pump.GetLastRuntime() % 60);
+  char tempVal[6];
+  dtostrf(pump.GetPumpTemp(), 4, 1, tempVal);
+  snprintf(msgTemp, 20, "Pump temp.: %s C", tempVal);
+
   u8g2.firstPage();
   do
   {
     u8g2.setFont(u8g2_font_9x15B_tr);
-    u8g2.setCursor(0, 15);
-    u8g2.print(pump.GetStateText());
+    u8g2.drawStr(0, 15, pump.GetStateText().c_str());
     u8g2.setFont(u8g2_font_6x10_tr);
     if (status == PumpControl::PumpState::MANUAL_STOP || status == PumpControl::PumpState::NOT_INITIALIZED)
     {
@@ -94,12 +80,8 @@ void displayStatus(PumpControl::PumpState status)
     }
     else
     {
-      String msg {"Last runtime: "};
-      msg.concat(pump.GetLastRuntime());
-      u8g2.drawStr(0, 25, msg.c_str());
-      msg = "Pump temp.: ";
-      msg.concat(pumpTemp);
-      u8g2.drawStr(0, 35, msg.c_str());
+      u8g2.drawStr(0, 25, msgTime);
+      u8g2.drawStr(0, 35, msgTemp);
     }
   } while (u8g2.nextPage());
 }
@@ -112,8 +94,7 @@ void loop()
   {
     counter1sec = millis();
     bool lowPressure = digitalRead(PRESSURE_SENSOR_PIN) == LOW ? true : false;
-    pump.CheckStateLoop(lowPressure);
-    auto state = pump.GetState();
+    auto state = pump.CheckStateLoop(lowPressure);
     displayStatus(state);
   }
 }

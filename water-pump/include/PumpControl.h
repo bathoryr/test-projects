@@ -7,7 +7,7 @@ class PumpControl
         enum class PumpState {NOT_INITIALIZED, READY, START, MANUAL_STOP};
         PumpControl(DallasTemperature& tempSensors, uint8_t pump_pin, uint8_t button_pin);
         void Initialize();
-        void CheckStateLoop(bool lowPressure);
+        PumpState CheckStateLoop(bool lowPressure);
         PumpState GetState() const;
         String GetStateText() const;
         String& GetErrorMsg();
