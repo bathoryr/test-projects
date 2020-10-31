@@ -5,9 +5,9 @@ class PumpControl
 {
     public:
         enum class PumpState {NOT_INITIALIZED, READY, START, MANUAL_STOP};
-        PumpControl(DallasTemperature& tempSensors, uint8_t pump_pin, uint8_t button_pin);
+        PumpControl(DallasTemperature& tempSensors, uint8_t pressure_pin, uint8_t pump_pin, uint8_t button_pin);
         void Initialize();
-        PumpState CheckStateLoop(bool lowPressure);
+        PumpState CheckStateLoop();
         PumpState GetState() const;
         String GetStateText() const;
         String& GetErrorMsg();
@@ -17,10 +17,12 @@ class PumpControl
     private:
         PumpState m_state;
         DallasTemperature& m_sensors;
+        uint8_t m_pressure_sensor_pin;
         uint8_t m_pump_control_pin;
         uint8_t m_confirm_button_pin;
         void StartPump();
         void StopPump();
+        bool CheckLowPressure();
         bool CheckSensors();
         bool CheckTemperature();
         bool CheckRuntime();

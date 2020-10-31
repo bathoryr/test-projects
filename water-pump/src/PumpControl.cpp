@@ -8,14 +8,15 @@ uint8_t PumpControl::SENSOR_PUMP_ID = 0;
 uint8_t PumpControl::SENSOR_SSR_ID = 1;
 volatile bool PumpControl::m_confirm_btn_pressed = false;
 
-PumpControl::PumpControl(DallasTemperature& tempSensors, uint8_t pump_pin, uint8_t button_pin) : 
-    m_state(PumpControl::PumpState::NOT_INITIALIZED), m_sensors(tempSensors), m_pump_control_pin(pump_pin),
-    m_confirm_button_pin(button_pin), m_lastRuntime(0)
+PumpControl::PumpControl(DallasTemperature& tempSensors, uint8_t pressure_pin, uint8_t pump_pin, uint8_t button_pin) : 
+    m_state(PumpControl::PumpState::NOT_INITIALIZED), m_sensors(tempSensors), m_pressure_sensor_pin(pressure_pin),
+    m_pump_control_pin(pump_pin), m_confirm_button_pin(button_pin), m_lastRuntime(0)
 {
 }
 
 void PumpControl::Initialize()
 {
+    pinMode(m_pressure_sensor_pin, INPUT_PULLUP);
     pinMode(m_pump_control_pin, OUTPUT);
     pinMode(m_confirm_button_pin, INPUT_PULLUP);
     // attachInterrupt(digitalPinToInterrupt(m_confirm_button_pin), ConfirmButtonPress_ISR, FALLING);
@@ -27,12 +28,12 @@ void PumpControl::ConfirmButtonPress_ISR()
     m_confirm_btn_pressed = true;
 }
 
-PumpControl::PumpState PumpControl::CheckStateLoop(bool lowPressure)
+PumpControl::PumpState PumpControl::CheckStateLoop()
 {
     switch (m_state)
     {
         case PumpState::READY:
-            if (lowPressure)
+            if (CheckLowPressure() == true)
             {
                 if (CheckSensors())
                 {
@@ -46,7 +47,7 @@ PumpControl::PumpState PumpControl::CheckStateLoop(bool lowPressure)
             }
             break;
         case PumpState::START:
-            if (lowPressure == false)
+            if (CheckLowPressure() == false)
             {
                 StopPump();
                 m_state = PumpState::READY;
@@ -66,7 +67,7 @@ PumpControl::PumpState PumpControl::CheckStateLoop(bool lowPressure)
             }
             break;
         case PumpState::NOT_INITIALIZED:
-            m_message = "Not initialized";
+            m_message = F("Not initialized");
             Serial.print(m_message);
             break;
     }
@@ -96,17 +97,23 @@ void PumpControl::StopPump()
     digitalWrite(m_pump_control_pin, LOW);
 }
 
+bool PumpControl::CheckLowPressure()
+{
+    bool lowPressure = digitalRead(m_pressure_sensor_pin) == LOW ? true : false;
+    return lowPressure;
+}
+
 bool PumpControl::CheckSensors()
 {
     DeviceAddress addr0, addr1;
     if (!m_sensors.getAddress(addr0, SENSOR_PUMP_ID) || !m_sensors.getAddress(addr1, SENSOR_SSR_ID))
     {
-        m_message = "Temp. sensors not connected";
+        m_message = F("Temp. sensors not connected");
         return false;
     }
     if (!m_sensors.isConnected(addr0) || !m_sensors.isConnected(addr1))
     {
-        m_message = "Temp. sensors error";
+        m_message = F("Temp. sensors error");
         return false;
     }
     return true;
@@ -138,6 +145,7 @@ bool PumpControl::CheckRuntime()
     {
         m_message = F("Max. runtime: ");
         m_message.concat(m_lastRuntime);
+        m_message.concat(" s");
         return false;
     }
     return true;
@@ -159,16 +167,16 @@ String PumpControl::GetStateText() const
     switch (m_state)
     {
     case PumpState::READY: 
-        result = "READY";
+        result = F("READY");
         break;
     case PumpState::START:
-        result = "RUNNING";
+        result = F("RUNNING");
         break;
     case PumpState::MANUAL_STOP:
-        result = "ERROR - STOP";
+        result = F("ERROR - STOP");
         break;
     default:
-        result = "UNKNOWN";
+        result = F("UNKNOWN");
     }
     return result;
 }
