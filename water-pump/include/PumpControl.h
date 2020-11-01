@@ -13,6 +13,7 @@ class PumpControl
         String& GetErrorMsg();
         uint16_t GetLastRuntime() const;
         float GetPumpTemp() const;
+        float GetSSRTemp() const;
         
     private:
         PumpState m_state;

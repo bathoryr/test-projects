@@ -63,6 +63,7 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
             if (CheckButtonPressed())
             {
                 m_confirm_btn_pressed = false;
+                m_message = "";
                 SetReadyState();
             }
             break;
@@ -195,4 +196,10 @@ float PumpControl::GetPumpTemp() const
 {
     m_sensors.requestTemperaturesByIndex(SENSOR_PUMP_ID);
     return m_sensors.getTempCByIndex(SENSOR_PUMP_ID);
+}
+
+float PumpControl::GetSSRTemp() const
+{
+    m_sensors.requestTemperaturesByIndex(SENSOR_SSR_ID);
+    return m_sensors.getTempCByIndex(SENSOR_SSR_ID);
 }

@@ -21,13 +21,9 @@
 #define TEMPERATURE_PRECISION 9
 
 // MySensors values
-// Status, temperature1, 2, time, message
-#define STATUS_ID 1
-#define TEMP1_ID 2
-#define TEMP2_ID 3
-#define MESSAGE_ID 4
+#define STATUS_ID 7
 #define SENSOR_NAME "Pump control"
-#define SENSOR_VERSION "0.1"
+#define SENSOR_VERSION "0.9"
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
@@ -78,11 +74,8 @@ void setup()
 
 void presentation()
 {
-  present(STATUS_ID, S_CUSTOM, F("Status, time"));   // VAR1 - status ID, VAR2 - runtime in seconds
-  present(TEMP1_ID, S_TEMP, F("Pump temperature"));
-  present(TEMP2_ID, S_TEMP, F("SSR temperature"));
-  present(MESSAGE_ID, S_INFO, F("Message text"));
-  sendSketchInfo(F(SENSOR_NAME), F(SENSOR_VERSION));
+  present(STATUS_ID, S_INFO, F("Pump status"));       // VAR1 - status ID, VAR2 - runtime in seconds
+  sendSketchInfo(F(SENSOR_NAME), F(SENSOR_VERSION));  // VAR3 - pump temp, VAR4 - SSR temp, TEXT - message
 }
 
 void displayStatus(PumpControl::PumpState status)
@@ -123,28 +116,35 @@ void sendStatus(PumpControl::PumpState state)
   send(msg.set(static_cast<uint8_t>(state)));
   msg.setType(V_VAR2);
   send(msg.set(pump.GetLastRuntime()));
-
-  // Send current state, temperature, if running time, if stopped last runtime
-  // if error then message
+  msg.setType(V_VAR3);
+  send(msg.set(pump.GetPumpTemp(), 1));
+  msg.setType(V_VAR4);
+  send(msg.set(pump.GetSSRTemp(), 1));
+  if (state == PumpControl::PumpState::MANUAL_STOP)
+  {
+    msg.setType(V_TEXT);
+    send(msg.set(pump.GetErrorMsg().c_str()));
+  }
 }
-
-unsigned long counter1sec;
-unsigned long counter30sec;
 
 void loop() 
 {
   static PumpControl::PumpState lastState;
   PumpControl::PumpState state;
 
+  static unsigned long counter1sec;
   if (millis() - counter1sec > 1000)
   {
     counter1sec = millis();
     state = pump.CheckStateLoop();
     displayStatus(state);
-  }
-  if (millis() - counter30sec > 30000 || lastState != state)
-  {
-    lastState = state;
-    sendStatus(state);
+
+    static unsigned long counter30sec;
+    if (millis() - counter30sec > 30000 || lastState != state)
+    {
+      counter30sec = millis();
+      lastState = state;
+      sendStatus(state);
+    }
   }
 }
