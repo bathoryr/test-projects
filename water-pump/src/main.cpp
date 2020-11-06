@@ -47,17 +47,17 @@ void setup()
 
   // locate devices on the bus
   char msgTemp[24];
-  snprintf(msgTemp, 24, PSTR("Found %d TS devices"), sensors.getDeviceCount());
+  snprintf(msgTemp, 24, "Found %d TS devices", sensors.getDeviceCount());
 
   // report parasite power requirements
   char msgPower[24];
-  snprintf(msgPower, 24, PSTR("Parasite power is: %s"), sensors.isParasitePowerMode() ? "ON" : "OFF");
+  snprintf(msgPower, 24, "Parasite power is: %s", sensors.isParasitePowerMode() ? "ON" : "OFF");
   
   char msgNode[12];
-  snprintf(msgNode, 12, PSTR("Node ID: %d"), getNodeId());
+  snprintf(msgNode, 12, "Node ID: %d", getNodeId());
 
   char msgBtn[16];
-  snprintf(msgBtn, 16, PSTR("Button %s"), digitalRead(CONFIRM_BUTTON_PIN) == LOW ? F("PRESS") : F("RELEASE"));
+  snprintf(msgBtn, 16, "Button %s", digitalRead(CONFIRM_BUTTON_PIN) == LOW ? "PRESS" : "RELEASE");
 
   // Display init
   if (u8g2.begin())
