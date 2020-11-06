@@ -63,8 +63,8 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
             if (CheckButtonPressed())
             {
                 m_confirm_btn_pressed = false;
-                m_message = "";
-                SetReadyState();
+                m_message = F("Confirm button pressed");
+                //SetReadyState();  only reset
             }
             break;
         case PumpState::NOT_INITIALIZED:
