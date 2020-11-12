@@ -5,15 +5,16 @@ class PumpControl
 {
     public:
         enum class PumpState {NOT_INITIALIZED, READY, START, MANUAL_STOP};
-        PumpControl(DallasTemperature& tempSensors, uint8_t pressure_pin, uint8_t pump_pin, uint8_t button_pin);
+        PumpControl(DallasTemperature& tempSensors, uint8_t pressure_pin, uint8_t pump_pin/*, uint8_t button_pin*/);
         void Initialize();
         PumpState CheckStateLoop();
         PumpState GetState() const;
         String GetStateText() const;
-        String& GetErrorMsg();
+        const String& GetErrorMsg() const;
         uint16_t GetLastRuntime() const;
         float GetPumpTemp() const;
         float GetSSRTemp() const;
+        void TriggerBtnPressed();
         
     private:
         PumpState m_state;
@@ -32,7 +33,7 @@ class PumpControl
         unsigned long m_startTime;
         uint16_t m_lastRuntime;
         String m_message;
-        static volatile bool m_confirm_btn_pressed;
+        bool m_confirm_btn_pressed;
 
         void SetManualState();
         void SetReadyState();

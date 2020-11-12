@@ -6,11 +6,11 @@ uint8_t PumpControl::MAX_TEMP_PUMP = 30;
 uint8_t PumpControl::MAX_TEMP_SSR = 50;
 uint8_t PumpControl::SENSOR_PUMP_ID = 0;
 uint8_t PumpControl::SENSOR_SSR_ID = 1;
-volatile bool PumpControl::m_confirm_btn_pressed = false;
+//volatile bool PumpControl::m_confirm_btn_pressed = false;
 
-PumpControl::PumpControl(DallasTemperature& tempSensors, uint8_t pressure_pin, uint8_t pump_pin, uint8_t button_pin) : 
+PumpControl::PumpControl(DallasTemperature& tempSensors, uint8_t pressure_pin, uint8_t pump_pin/*, uint8_t button_pin*/) : 
     m_state(PumpControl::PumpState::NOT_INITIALIZED), m_sensors(tempSensors), m_pressure_sensor_pin(pressure_pin),
-    m_pump_control_pin(pump_pin), m_confirm_button_pin(button_pin), m_lastRuntime(0)
+    m_pump_control_pin(pump_pin)/*, m_confirm_button_pin(button_pin)*/, m_lastRuntime(0)
 {
 }
 
@@ -18,14 +18,19 @@ void PumpControl::Initialize()
 {
     pinMode(m_pressure_sensor_pin, INPUT_PULLUP);
     pinMode(m_pump_control_pin, OUTPUT);
-    pinMode(m_confirm_button_pin, INPUT_PULLUP);
+    //pinMode(m_confirm_button_pin, INPUT_PULLUP);
     // attachInterrupt(digitalPinToInterrupt(m_confirm_button_pin), ConfirmButtonPress_ISR, FALLING);
     m_state = PumpState::READY;
 }
 
-void PumpControl::ConfirmButtonPress_ISR()
+void PumpControl::TriggerBtnPressed()
 {
     m_confirm_btn_pressed = true;
+}
+
+void PumpControl::ConfirmButtonPress_ISR()
+{
+    //m_confirm_btn_pressed = true;
 }
 
 PumpControl::PumpState PumpControl::CheckStateLoop()
@@ -64,7 +69,7 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
             {
                 m_confirm_btn_pressed = false;
                 m_message = F("Confirm button pressed");
-                //SetReadyState();  only reset
+                SetReadyState();
             }
             break;
         case PumpState::NOT_INITIALIZED:
@@ -77,13 +82,13 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
 
 void PumpControl::SetManualState()
 {
-    attachInterrupt(digitalPinToInterrupt(m_confirm_button_pin), ConfirmButtonPress_ISR, FALLING);
+    //attachInterrupt(digitalPinToInterrupt(m_confirm_button_pin), ConfirmButtonPress_ISR, FALLING);
     m_state = PumpState::MANUAL_STOP;
 }
 
 void PumpControl::SetReadyState()
 {
-    detachInterrupt(digitalPinToInterrupt(m_confirm_button_pin));
+    //detachInterrupt(digitalPinToInterrupt(m_confirm_button_pin));
     m_state = PumpState::READY;
 }
 
@@ -182,7 +187,7 @@ String PumpControl::GetStateText() const
     return result;
 }
 
-String& PumpControl::GetErrorMsg()
+const String& PumpControl::GetErrorMsg() const
 {
     return m_message;
 }
