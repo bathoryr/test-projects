@@ -1,11 +1,13 @@
 #pragma once
+// Temperature sensors
+#include <OneWire.h>
 #include <DallasTemperature.h>
 
 class PumpControl
 {
     public:
         enum class PumpState {NOT_INITIALIZED, READY, START, MANUAL_STOP};
-        PumpControl(DallasTemperature& tempSensors, uint8_t pressure_pin, uint8_t pump_pin/*, uint8_t button_pin*/);
+        PumpControl(uint8_t pressure_pin, uint8_t pump_pin);
         void Initialize();
         PumpState CheckStateLoop();
         PumpState GetState() const;
@@ -15,10 +17,12 @@ class PumpControl
         float GetPumpTemp() const;
         float GetSSRTemp() const;
         void TriggerBtnPressed();
+        const DallasTemperature& GetTempSensors() const;
         
     private:
+        OneWire m_oneWire;
+        DallasTemperature m_sensors;
         PumpState m_state;
-        DallasTemperature& m_sensors;
         uint8_t m_pressure_sensor_pin;
         uint8_t m_pump_control_pin;
         uint8_t m_confirm_button_pin;
@@ -37,7 +41,6 @@ class PumpControl
 
         void SetManualState();
         void SetReadyState();
-        static void ConfirmButtonPress_ISR();
         static unsigned long MAX_RUNTIME;
         static uint8_t MAX_TEMP_PUMP;
         static uint8_t MAX_TEMP_SSR;

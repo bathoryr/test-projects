@@ -5,7 +5,7 @@ class PumpStatus
 {
     public:
         PumpStatus(const PumpControl& pumpRef);
-        void Initialize(DallasTemperature& sensors, uint8_t buttonPin);
+        void Initialize(uint8_t buttonPin);
         void Present();
         void Update();
 

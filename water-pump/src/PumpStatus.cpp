@@ -16,8 +16,9 @@ PumpStatus::PumpStatus(const PumpControl& pumpRef) : pump(pumpRef), u8g2(U8G2_R0
 {
 }
 
-void PumpStatus::Initialize(DallasTemperature& sensors, uint8_t buttonPin)
+void PumpStatus::Initialize(uint8_t buttonPin)
 {
+    DallasTemperature& sensors = const_cast<DallasTemperature&>(pump.GetTempSensors());
     // locate devices on the bus
     char msgTemp[20];
     snprintf(msgTemp, 20, "Found %d TS devices", sensors.getDeviceCount());
@@ -127,8 +128,10 @@ void PumpStatus::SendStatus()
 void PumpStatus::Update()
 {
     DisplayStatus();
-    // Update is called each 1 second, send status max every 5 seconds
-    if (++counter % 5 == 0)
+    // Update is called each 1 second, send status every 5 seconds when running
+    uint8_t interval = pump.GetState() == PumpControl::PumpState::START ? 5 : 30;
+    
+    if (++counter % interval == 0)
     {
         SendStatus();
     }

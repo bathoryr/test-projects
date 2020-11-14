@@ -1,7 +1,5 @@
 #include <Arduino.h>
-// Temperature sensors
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include "loop-call.h"
 // Bounce2
 #include <Bounce2.h>
 // Pump control
@@ -12,41 +10,33 @@
 #define PUMP_CONTROL_PIN 4
 #define CONFIRM_BUTTON_PIN 2
 
-// Data wire is plugged into port 2 on the Arduino
-#define ONE_WIRE_BUS 5
-#define TEMPERATURE_PRECISION 9
-
-// Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-OneWire oneWire(ONE_WIRE_BUS);
-
-// Pass our oneWire reference to Dallas Temperature.
-DallasTemperature sensors(&oneWire);
-
 // Button bounce
 Bounce button = Bounce();
 
 // Pump control class
-PumpControl pump(sensors, PRESSURE_SENSOR_PIN, PUMP_CONTROL_PIN/*, CONFIRM_BUTTON_PIN*/);
+PumpControl pump(PRESSURE_SENSOR_PIN, PUMP_CONTROL_PIN);
 PumpStatus pumpStatus(pump);
 
 void setup() 
 {
-    // Start up the library
-    sensors.begin();
-    sensors.setResolution(TEMPERATURE_PRECISION);
-
     // Bounce button
     button.attach(CONFIRM_BUTTON_PIN, INPUT_PULLUP);
     button.interval(25);
 
     pump.Initialize();
     // Display init status
-    pumpStatus.Initialize(sensors, CONFIRM_BUTTON_PIN);
+    pumpStatus.Initialize(CONFIRM_BUTTON_PIN);
 }
 
 void presentation()
 {
     pumpStatus.Present();
+}
+
+void pump_status_and_update()
+{
+    pump.CheckStateLoop();
+    pumpStatus.Update();
 }
 
 void loop() 
@@ -57,11 +47,5 @@ void loop()
         pump.TriggerBtnPressed();
     }
 
-    static unsigned long counter1sec;
-    if (millis() - counter1sec > 1000)
-    {
-        counter1sec = millis();
-        pump.CheckStateLoop();
-        pumpStatus.Update();
-    }
+    CALL_LOOP(1000, pump_status_and_update);
 }

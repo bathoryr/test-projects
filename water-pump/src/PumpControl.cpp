@@ -1,16 +1,19 @@
 #include "PumpControl.h"
 
+#define ONE_WIRE_BUS 5
+#define TEMPERATURE_PRECISION 9
+
 // Maximum run time of the pump: 5 minutes 
 unsigned long PumpControl::MAX_RUNTIME = 5ul * 60 * 1000;
 uint8_t PumpControl::MAX_TEMP_PUMP = 30;
 uint8_t PumpControl::MAX_TEMP_SSR = 50;
 uint8_t PumpControl::SENSOR_PUMP_ID = 0;
 uint8_t PumpControl::SENSOR_SSR_ID = 1;
-//volatile bool PumpControl::m_confirm_btn_pressed = false;
 
-PumpControl::PumpControl(DallasTemperature& tempSensors, uint8_t pressure_pin, uint8_t pump_pin/*, uint8_t button_pin*/) : 
-    m_state(PumpControl::PumpState::NOT_INITIALIZED), m_sensors(tempSensors), m_pressure_sensor_pin(pressure_pin),
-    m_pump_control_pin(pump_pin)/*, m_confirm_button_pin(button_pin)*/, m_lastRuntime(0)
+PumpControl::PumpControl(uint8_t pressure_pin, uint8_t pump_pin) : 
+    m_oneWire(ONE_WIRE_BUS), m_sensors(&m_oneWire),
+    m_state(PumpControl::PumpState::NOT_INITIALIZED), m_pressure_sensor_pin(pressure_pin),
+    m_pump_control_pin(pump_pin), m_lastRuntime(0)
 {
 }
 
@@ -18,19 +21,17 @@ void PumpControl::Initialize()
 {
     pinMode(m_pressure_sensor_pin, INPUT_PULLUP);
     pinMode(m_pump_control_pin, OUTPUT);
-    //pinMode(m_confirm_button_pin, INPUT_PULLUP);
-    // attachInterrupt(digitalPinToInterrupt(m_confirm_button_pin), ConfirmButtonPress_ISR, FALLING);
+
+    // Start up the library
+    m_sensors.begin();
+    m_sensors.setResolution(TEMPERATURE_PRECISION);
+
     m_state = PumpState::READY;
 }
 
 void PumpControl::TriggerBtnPressed()
 {
     m_confirm_btn_pressed = true;
-}
-
-void PumpControl::ConfirmButtonPress_ISR()
-{
-    //m_confirm_btn_pressed = true;
 }
 
 PumpControl::PumpState PumpControl::CheckStateLoop()
@@ -67,7 +68,6 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
         case PumpState::MANUAL_STOP:
             if (CheckButtonPressed())
             {
-                m_confirm_btn_pressed = false;
                 m_message = F("Confirm button pressed");
                 SetReadyState();
             }
@@ -82,13 +82,12 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
 
 void PumpControl::SetManualState()
 {
-    //attachInterrupt(digitalPinToInterrupt(m_confirm_button_pin), ConfirmButtonPress_ISR, FALLING);
+    m_confirm_btn_pressed = false;
     m_state = PumpState::MANUAL_STOP;
 }
 
 void PumpControl::SetReadyState()
 {
-    //detachInterrupt(digitalPinToInterrupt(m_confirm_button_pin));
     m_state = PumpState::READY;
 }
 
@@ -159,7 +158,13 @@ bool PumpControl::CheckRuntime()
 
 bool PumpControl::CheckButtonPressed()
 {
-    return m_confirm_btn_pressed;
+    if (m_confirm_btn_pressed)
+    {
+        m_confirm_btn_pressed = false;
+        return true;
+    }
+    
+    return false;
 }
 
 PumpControl::PumpState PumpControl::GetState() const
@@ -169,22 +174,17 @@ PumpControl::PumpState PumpControl::GetState() const
 
 String PumpControl::GetStateText() const
 {
-    String result;
     switch (m_state)
     {
     case PumpState::READY: 
-        result = F("READY");
-        break;
+        return String(F("READY"));
     case PumpState::START:
-        result = F("RUNNING");
-        break;
+        return String(F("RUNNING"));
     case PumpState::MANUAL_STOP:
-        result = F("ERROR - STOP");
-        break;
+        return String(F("ERROR - STOP"));
     default:
-        result = F("UNKNOWN");
+        return String(F("UNKNOWN"));
     }
-    return result;
 }
 
 const String& PumpControl::GetErrorMsg() const
@@ -199,12 +199,18 @@ uint16_t PumpControl::GetLastRuntime() const
 
 float PumpControl::GetPumpTemp() const
 {
-    m_sensors.requestTemperaturesByIndex(SENSOR_PUMP_ID);
-    return m_sensors.getTempCByIndex(SENSOR_PUMP_ID);
+    // Dallas methods are not const ...
+    const_cast<DallasTemperature&>(m_sensors).requestTemperaturesByIndex(SENSOR_PUMP_ID);
+    return const_cast<DallasTemperature&>(m_sensors).getTempCByIndex(SENSOR_PUMP_ID);
 }
 
 float PumpControl::GetSSRTemp() const
 {
-    m_sensors.requestTemperaturesByIndex(SENSOR_SSR_ID);
-    return m_sensors.getTempCByIndex(SENSOR_SSR_ID);
+    const_cast<DallasTemperature&>(m_sensors).requestTemperaturesByIndex(SENSOR_SSR_ID);
+    return const_cast<DallasTemperature&>(m_sensors).getTempCByIndex(SENSOR_SSR_ID);
+}
+
+const DallasTemperature& PumpControl::GetTempSensors() const
+{
+    return m_sensors;
 }
