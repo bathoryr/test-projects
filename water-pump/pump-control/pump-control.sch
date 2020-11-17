@@ -107,7 +107,7 @@ U 1 1 5FA27A62
 P 7450 3900
 F 0 "J1" H 7530 3892 50  0000 L CNN
 F 1 "pressure contact" H 7530 3801 50  0000 L CNN
-F 2 "Connector_AMASS:AMASS_XT30UPB-M_1x02_P5.0mm_Vertical" H 7450 3900 50  0001 C CNN
+F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal" H 7450 3900 50  0001 C CNN
 F 3 "~" H 7450 3900 50  0001 C CNN
 	1    7450 3900
 	1    0    0    -1  
@@ -118,7 +118,7 @@ U 1 1 5FA2937E
 P 7450 4150
 F 0 "J2" H 7530 4142 50  0000 L CNN
 F 1 "SSR control" H 7530 4051 50  0000 L CNN
-F 2 "Connector_AMASS:AMASS_XT30UPB-M_1x02_P5.0mm_Vertical" H 7450 4150 50  0001 C CNN
+F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal" H 7450 4150 50  0001 C CNN
 F 3 "~" H 7450 4150 50  0001 C CNN
 	1    7450 4150
 	1    0    0    -1  
@@ -289,7 +289,6 @@ NoConn ~ 6100 3000
 NoConn ~ 6100 3100
 NoConn ~ 6100 3600
 NoConn ~ 6100 3700
-NoConn ~ 6100 4200
 NoConn ~ 6100 4300
 Text Label 6950 1350 0    50   ~ 0
 MOSI
@@ -310,23 +309,23 @@ Wire Wire Line
 $Comp
 L power:PWR_FLAG #FLG0101
 U 1 1 5FA8045E
-P 3500 800
-F 0 "#FLG0101" H 3500 875 50  0001 C CNN
-F 1 "PWR_FLAG" H 3500 973 50  0000 C CNN
-F 2 "" H 3500 800 50  0001 C CNN
-F 3 "~" H 3500 800 50  0001 C CNN
-	1    3500 800 
-	1    0    0    -1  
+P 4000 1300
+F 0 "#FLG0101" H 4000 1375 50  0001 C CNN
+F 1 "PWR_FLAG" H 4000 1473 50  0000 C CNN
+F 2 "" H 4000 1300 50  0001 C CNN
+F 3 "~" H 4000 1300 50  0001 C CNN
+	1    4000 1300
+	-1   0    0    1   
 $EndComp
 $Comp
 L power:PWR_FLAG #FLG0102
 U 1 1 5FA8139A
-P 3750 800
-F 0 "#FLG0102" H 3750 875 50  0001 C CNN
-F 1 "PWR_FLAG" H 3750 973 50  0000 C CNN
-F 2 "" H 3750 800 50  0001 C CNN
-F 3 "~" H 3750 800 50  0001 C CNN
-	1    3750 800 
+P 4000 750
+F 0 "#FLG0102" H 4000 825 50  0001 C CNN
+F 1 "PWR_FLAG" H 4000 923 50  0000 C CNN
+F 2 "" H 4000 750 50  0001 C CNN
+F 3 "~" H 4000 750 50  0001 C CNN
+	1    4000 750 
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -352,7 +351,7 @@ F 3 "http://www.advanced-monolithic.com/pdf/ds1117.pdf" H 6600 750 50  0001 C CN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	6200 1000 5500 1000
+	6200 1000 5900 1000
 Connection ~ 5500 1000
 Wire Wire Line
 	5500 1000 5500 1300
@@ -416,7 +415,7 @@ Connection ~ 6250 3800
 Wire Wire Line
 	6250 3800 6500 3800
 Wire Wire Line
-	5500 5100 7150 5100
+	5500 5100 6200 5100
 Wire Wire Line
 	6900 3800 7150 3800
 Connection ~ 7150 3800
@@ -447,47 +446,27 @@ Connection ~ 4950 1500
 Wire Wire Line
 	4950 1500 5200 1500
 $Comp
-L Connector:Screw_Terminal_01x02 J5
+L Connector:Screw_Terminal_01x03 J5
 U 1 1 5FA71ED4
-P 2750 1050
-F 0 "J5" H 2830 1042 50  0000 L CNN
-F 1 "230V AC" H 2830 951 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x02_P2.54mm_Vertical" H 2750 1050 50  0001 C CNN
-F 3 "~" H 2750 1050 50  0001 C CNN
-	1    2750 1050
-	-1   0    0    1   
+P 2650 1050
+F 0 "J5" H 2730 1042 50  0000 L CNN
+F 1 "230V AC" H 2730 951 50  0000 L CNN
+F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal" H 2650 1050 50  0001 C CNN
+F 3 "~" H 2650 1050 50  0001 C CNN
+	1    2650 1050
+	-1   0    0    -1  
 $EndComp
 $Comp
 L Device:Fuse_Small F1
 U 1 1 5FA73702
-P 3200 900
-F 0 "F1" H 3200 1085 50  0000 C CNN
-F 1 "Fuse_Small" H 3200 994 50  0000 C CNN
-F 2 "Fuse:Fuseholder_TR5_Littelfuse_No560_No460" H 3200 993 50  0001 C CNN
-F 3 "~" H 3200 900 50  0001 C CNN
-	1    3200 900 
+P 3050 850
+F 0 "F1" H 3050 1035 50  0000 C CNN
+F 1 ".5A" H 3050 944 50  0000 C CNN
+F 2 "Fuse:Fuseholder_TR5_Littelfuse_No560_No460" H 3050 943 50  0001 C CNN
+F 3 "~" H 3050 850 50  0001 C CNN
+	1    3050 850 
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	2950 950  3100 950 
-Wire Wire Line
-	3300 900  3750 900 
-Wire Wire Line
-	2950 1050 3500 1050
-Wire Wire Line
-	4050 1050 4050 1100
-Wire Wire Line
-	3100 950  3100 900 
-Wire Wire Line
-	3500 800  3500 1050
-Connection ~ 3500 1050
-Wire Wire Line
-	3500 1050 4050 1050
-Wire Wire Line
-	3750 800  3750 900 
-Connection ~ 3750 900 
-Wire Wire Line
-	3750 900  4050 900 
 Wire Wire Line
 	6650 2850 6650 3400
 $Comp
@@ -544,4 +523,164 @@ Wire Wire Line
 Connection ~ 6900 4500
 Wire Wire Line
 	6900 4500 7400 4500
+$Comp
+L Device:CP C4
+U 1 1 5FB0BA90
+P 5900 1150
+F 0 "C4" H 6018 1196 50  0000 L CNN
+F 1 "100u" H 6018 1105 50  0000 L CNN
+F 2 "Capacitor_THT:CP_Radial_D7.5mm_P2.50mm" H 5938 1000 50  0001 C CNN
+F 3 "~" H 5900 1150 50  0001 C CNN
+	1    5900 1150
+	1    0    0    -1  
+$EndComp
+Connection ~ 5900 1000
+Wire Wire Line
+	5900 1000 5500 1000
+Wire Wire Line
+	5900 1300 6500 1300
+Connection ~ 6500 1300
+$Comp
+L Device:C_Small C5
+U 1 1 5FB1C8B8
+P 3550 1000
+F 0 "C5" H 3500 1250 50  0000 L CNN
+F 1 ".1u" H 3550 800 50  0000 L CNN
+F 2 "Capacitor_THT:C_Rect_L18.0mm_W6.0mm_P15.00mm_FKS3_FKP3" H 3550 1000 50  0001 C CNN
+F 3 "~" H 3550 1000 50  0001 C CNN
+	1    3550 1000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Varistor RV1
+U 1 1 5FB251E3
+P 3300 1000
+F 0 "RV1" H 3250 1250 50  0000 L CNN
+F 1 "300/450V" H 3100 800 50  0000 L CNN
+F 2 "Varistor:RV_Disc_D12mm_W3.9mm_P7.5mm" V 3230 1000 50  0001 C CNN
+F 3 "~" H 3300 1000 50  0001 C CNN
+	1    3300 1000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3950 950  4000 950 
+Wire Wire Line
+	4050 950  4050 900 
+Wire Wire Line
+	3950 1050 4000 1050
+Wire Wire Line
+	4050 1050 4050 1100
+Wire Wire Line
+	3550 900  3750 900 
+Wire Wire Line
+	3750 900  3750 950 
+Wire Wire Line
+	3550 1100 3750 1100
+Wire Wire Line
+	3750 1100 3750 1050
+Wire Wire Line
+	3300 1150 3550 1150
+Wire Wire Line
+	3550 1150 3550 1100
+Connection ~ 3550 1100
+Wire Wire Line
+	3300 850  3550 850 
+Wire Wire Line
+	3550 850  3550 900 
+Connection ~ 3550 900 
+Wire Wire Line
+	3150 850  3300 850 
+Connection ~ 3300 850 
+Wire Wire Line
+	2850 850  2850 950 
+Connection ~ 3300 1150
+Wire Wire Line
+	2850 1150 2850 1050
+Connection ~ 2850 1150
+Text Label 2800 950  0    50   ~ 0
+L
+Text Label 2800 1050 0    50   ~ 0
+N
+Text Label 2800 1150 0    50   ~ 0
+N
+Wire Wire Line
+	2850 1150 3300 1150
+Wire Wire Line
+	4000 750  4000 950 
+Connection ~ 4000 950 
+Wire Wire Line
+	4000 950  4050 950 
+Wire Wire Line
+	4000 1300 4000 1050
+Connection ~ 4000 1050
+Wire Wire Line
+	4000 1050 4050 1050
+Wire Wire Line
+	2850 850  2950 850 
+$Comp
+L Device:L_Core_Ferrite_Coupled_Small_1423 L1
+U 1 1 5FB1D4B8
+P 3850 1000
+F 0 "L1" H 3850 1231 50  0000 C CNN
+F 1 "10mH" H 3850 1140 50  0000 C CNN
+F 2 "Inductor_THT:L_CommonMode_Toroid_Vertical_L21.0mm_W10.0mm_Px5.08mm_Py12.70mm_muRATA_5100" H 3850 1000 50  0001 C CNN
+F 3 "~" H 3850 1000 50  0001 C CNN
+	1    3850 1000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R3
+U 1 1 5FB3C1A1
+P 6200 4600
+F 0 "R3" H 6270 4646 50  0000 L CNN
+F 1 "330" H 6270 4555 50  0000 L CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal" V 6130 4600 50  0001 C CNN
+F 3 "~" H 6200 4600 50  0001 C CNN
+	1    6200 4600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6100 4200 6200 4200
+Wire Wire Line
+	6200 4200 6200 4450
+$Comp
+L Device:LED_Small D1
+U 1 1 5FB40DAC
+P 6200 4900
+F 0 "D1" V 6246 4830 50  0000 R CNN
+F 1 "LED_btn" V 6155 4830 50  0000 R CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" V 6200 4900 50  0001 C CNN
+F 3 "~" V 6200 4900 50  0001 C CNN
+	1    6200 4900
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	6200 4750 6200 4800
+Wire Wire Line
+	6200 5000 6200 5100
+Connection ~ 6200 5100
+Wire Wire Line
+	6200 5100 7150 5100
+$Comp
+L Mechanical:MountingHole H1
+U 1 1 5FB501F7
+P 3350 1950
+F 0 "H1" H 3450 1996 50  0000 L CNN
+F 1 "MountingHole" H 3450 1905 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3" H 3350 1950 50  0001 C CNN
+F 3 "~" H 3350 1950 50  0001 C CNN
+	1    3350 1950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H2
+U 1 1 5FB50764
+P 3350 2250
+F 0 "H2" H 3450 2296 50  0000 L CNN
+F 1 "MountingHole" H 3450 2205 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3" H 3350 2250 50  0001 C CNN
+F 3 "~" H 3350 2250 50  0001 C CNN
+	1    3350 2250
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
