@@ -52,8 +52,8 @@ void PumpStatus::Initialize(uint8_t buttonPin)
 
 void PumpStatus::Present()
 {
-    present(STATUS_ID, S_INFO, F("Pump status"));       // VAR1 - status ID, VAR2 - runtime in seconds
-    sendSketchInfo(F(SENSOR_NAME), F(SENSOR_VERSION));  // VAR3 - pump temp, VAR4 - SSR temp, TEXT - message
+    sendSketchInfo(F(SENSOR_NAME), F(SENSOR_VERSION));    // VAR1 - status ID, VAR2 - runtime in seconds
+    present(STATUS_ID, S_INFO, F("Pump status"));         // VAR3 - pump temp, VAR4 - SSR temp, TEXT - message
 }
 
 void PumpStatus::DisplayStatus()

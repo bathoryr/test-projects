@@ -1,10 +1,10 @@
 #include <Arduino.h>
+#include <Wire.h>
 
 // Sensor config: MYSBootloader, 16MHz Xtal
 
 //#define MY_DEBUG
 //#define MY_DEBUG_VERBOSE_RF24
-#include <Wire.h>
 #define MY_SPLASH_SCREEN_DISABLED
 #define MY_RADIO_RF24
 #define MY_RF24_PA_LEVEL (RF24_PA_MAX)
@@ -23,15 +23,13 @@
 #define CHILD_ID_MOVE_DETECT 5
 #define CHILD_ID_INFO 99
 
-#include "LoopWorker.h"
+#include "loop-call.h"
 #include "Light.h"
 
 void CheckMotion();
 void SendIllumination();
 
 Light light;
-LoopWorker Loop1s(CheckMotion, 1);
-LoopWorker Loop1m(SendIllumination, 60);
 
 void setup()
 {
@@ -41,19 +39,14 @@ void setup()
 	pinMode(MOTION_PIN, INPUT);
 
 	request(CHILD_ID_LIGHT, V_DIMMER);
-	// DON'T wait for longer time (200ms), or values in messages are overwritten!!! Maybe don't wait at all
-	//wait(10);
 	request(CHILD_ID_LIGHT, V_STATUS);
-	//wait(10);
 	request(CHILD_ID_MOVE_DETECT, V_STATUS);
-	//wait(10);
 	request(CHILD_ID_TIMEOUT, V_LEVEL);
-	//wait(10);
 }
 
 void presentation()
 {
-	sendSketchInfo("Dimmable Light", "3.0.1");
+	sendSketchInfo("Dimmable Light", "3.1.1");
 
 	present(CHILD_ID_LIGHT, S_DIMMER, "Light control");
 	present(CHILD_ID_MOTION, S_MOTION, "Motion activity");
@@ -67,8 +60,8 @@ void presentation()
 
 void loop()
 {
-	Loop1s.DoWork();
-	Loop1m.DoWork();
+	CALL_LOOP(1000, CheckMotion);
+	CALL_LOOP(30000, SendIllumination);
 }
 
 void CheckMotion()
@@ -109,7 +102,6 @@ void receive(const MyMessage &message)
 			if (message.getInt() > 0) {
 				light.SetTimeout(message.getInt());
 #ifdef MY_DEBUG
-
 				send(msg.set("Got V_LEVEL val"));
 #endif
 			}

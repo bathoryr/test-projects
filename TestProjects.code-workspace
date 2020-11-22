@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "./CellButton"
+		},
+		{
+			"name": "water-pump",
+			"path": "./water-pump"
+		},
+		{
+			"path": "./LEDLight"
+		}
+	],
+	"settings": {}
+}

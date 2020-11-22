@@ -74,10 +74,10 @@ public:
     }
 
     bool IsDarkness(unsigned int lux = 12) {
-        return GetAvgIllumination() < lux;
+        return (GetAvgIllumination() < lux);
     }
 
-    unsigned int GetIlluminationLevel() {
+    float GetIlluminationLevel() {
         return lightSensor.readLightLevel();
     }
 
