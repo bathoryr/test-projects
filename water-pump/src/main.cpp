@@ -23,9 +23,9 @@ void setup()
     button.attach(CONFIRM_BUTTON_PIN, INPUT_PULLUP);
     button.interval(25);
 
-    pump.Initialize();
+    pump.Initialize(&pumpStatus);
     // Display init status
-    pumpStatus.Initialize(CONFIRM_BUTTON_PIN);
+    pumpStatus.Initialize();
 }
 
 void presentation()

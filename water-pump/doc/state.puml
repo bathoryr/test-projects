@@ -1,14 +1,18 @@
 @startuml
-[*] --> Stop
+[*] --> Init
+Init: Initialize
 Start: Pump is running
-Stop: Pump stopped
+Ready: Pump stopped
 Manual: Check state
-Stop --> Start : Low pressure
-Start --> Stop : High pressure
+Init --> Ready
+Init --> Manual : Check sensors error
+Ready --> Start : Low pressure
+Start --> Ready : High pressure
 Start --> Manual : High temp SSR
 Start --> Manual : High temp PUMP
-Start --> Manual : Long time on
-Manual --> Stop : Confirmation
+Start --> Manual : Long time run
+Start --> Manual : Check sensors error
+Manual --> Ready : Confirmation
 note on link
   Manual button
 end note

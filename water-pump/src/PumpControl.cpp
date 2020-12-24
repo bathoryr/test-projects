@@ -1,4 +1,5 @@
 #include "PumpControl.h"
+#include "PumpStatus.h"
 
 #define ONE_WIRE_BUS 5
 #define TEMPERATURE_PRECISION 9
@@ -17,8 +18,9 @@ PumpControl::PumpControl(uint8_t pressure_pin, uint8_t pump_pin) :
 {
 }
 
-void PumpControl::Initialize()
+void PumpControl::Initialize(PumpStatus* pumpStatus)
 {
+    m_pumpStatus = pumpStatus;
     pinMode(m_pressure_sensor_pin, INPUT_PULLUP);
     pinMode(m_pump_control_pin, OUTPUT);
 
@@ -26,7 +28,8 @@ void PumpControl::Initialize()
     m_sensors.begin();
     m_sensors.setResolution(TEMPERATURE_PRECISION);
 
-    m_state = PumpState::READY;
+    // Initial check
+    m_state = CheckSensors() ? PumpState::READY : PumpState::MANUAL_STOP;
 }
 
 void PumpControl::TriggerBtnPressed()
@@ -51,12 +54,20 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
                     SetManualState();
                 }
             }
+            else if (CheckButtonPressed())
+            {
+                CheckSensors();
+                m_pumpStatus->ShowStatus(5000);
+            }
+            
             break;
         case PumpState::START:
             if (CheckLowPressure() == false)
             {
                 StopPump();
                 m_state = PumpState::READY;
+                // Everything went OK, reset message
+                m_message = F("OK");
                 break;
             }
             if (CheckTemperature() == false || CheckRuntime() == false)
@@ -74,7 +85,6 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
             break;
         case PumpState::NOT_INITIALIZED:
             m_message = F("Not initialized");
-            Serial.print(m_message);
             break;
     }
     return m_state;
@@ -113,12 +123,12 @@ bool PumpControl::CheckSensors()
     DeviceAddress addr0, addr1;
     if (!m_sensors.getAddress(addr0, SENSOR_PUMP_ID) || !m_sensors.getAddress(addr1, SENSOR_SSR_ID))
     {
-        m_message = F("Temp. sensors not connected");
+        m_message = F("Temp. sensors not present");
         return false;
     }
     if (!m_sensors.isConnected(addr0) || !m_sensors.isConnected(addr1))
     {
-        m_message = F("Temp. sensors error");
+        m_message = F("Temp. sensors connection error");
         return false;
     }
     return true;

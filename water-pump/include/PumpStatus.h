@@ -5,9 +5,10 @@ class PumpStatus
 {
     public:
         PumpStatus(const PumpControl& pumpRef);
-        void Initialize(uint8_t buttonPin);
+        void Initialize();
         void Present();
         void Update();
+        void ShowStatus(uint16_t mseconds);
 
     protected:
         void DisplayStatus();
@@ -15,13 +16,13 @@ class PumpStatus
 
     private:
         const PumpControl& pump;
-        uint8_t counter;
+        //uint8_t counter;
 
         U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2;
 
         float pumpTemp;
         float SSRTemp;
-        uint16_t runtime;
+        //uint16_t runtime;
         String lastError;
         PumpControl::PumpState lastState;
 };
