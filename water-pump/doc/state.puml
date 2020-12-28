@@ -1,4 +1,4 @@
-@startuml
+@startuml "States"
 [*] --> Init
 Init: Initialize
 Start: Pump is running

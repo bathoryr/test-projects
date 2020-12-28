@@ -618,17 +618,6 @@ Wire Wire Line
 Wire Wire Line
 	2850 850  2950 850 
 $Comp
-L Device:L_Core_Ferrite_Coupled_Small_1423 L1
-U 1 1 5FB1D4B8
-P 3850 1000
-F 0 "L1" H 3850 1231 50  0000 C CNN
-F 1 "10mH" H 3850 1140 50  0000 C CNN
-F 2 "Inductor_THT:L_CommonMode_Toroid_Vertical_L21.0mm_W10.0mm_Px5.08mm_Py12.70mm_muRATA_5100" H 3850 1000 50  0001 C CNN
-F 3 "~" H 3850 1000 50  0001 C CNN
-	1    3850 1000
-	1    0    0    -1  
-$EndComp
-$Comp
 L Device:R R3
 U 1 1 5FB3C1A1
 P 6200 4600
@@ -681,6 +670,17 @@ F 1 "MountingHole" H 3450 2205 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3" H 3350 2250 50  0001 C CNN
 F 3 "~" H 3350 2250 50  0001 C CNN
 	1    3350 2250
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:L_Core_Ferrite_Coupled_Small_1243 L1
+U 1 1 5FE66F9A
+P 3850 1000
+F 0 "L1" H 3850 1231 50  0000 C CNN
+F 1 "10 mH" H 3850 1140 50  0000 C CNN
+F 2 "Inductor_THT:L_CommonMode_Wuerth_WE-CMB-XS" H 3850 1000 50  0001 C CNN
+F 3 "~" H 3850 1000 50  0001 C CNN
+	1    3850 1000
 	1    0    0    -1  
 $EndComp
 $EndSCHEMATC
