@@ -1,10 +1,10 @@
 #pragma once
 #include <stdint.h>
 
-class LED
+class LEDControl
 {
-    public:
-    LED(uint8_t pin);
+public:
+    LEDControl(uint8_t pin);
     // This should be called from main loop
     void Update();
     
@@ -12,7 +12,7 @@ class LED
     void Light();
     void Dim();
 
-    private:
+private:
     uint8_t led_pin;
     uint16_t blink_timeout;
     unsigned long millis_counter;

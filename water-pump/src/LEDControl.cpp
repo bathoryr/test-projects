@@ -1,12 +1,12 @@
 #include <Arduino.h>
-#include "LED.h"
+#include "LEDControl.h"
 
-LED::LED(uint8_t pin) : led_pin(pin), millis_counter(millis())
+LEDControl::LEDControl(uint8_t pin) : led_pin(pin), blink_timeout(0l), millis_counter(millis())
 {
     pinMode(pin, OUTPUT);
 }
 
-void LED::Update()
+void LEDControl::Update()
 {
     if (blink_timeout != 0l)
     {
@@ -18,18 +18,21 @@ void LED::Update()
     }
 }
 
-void LED::Blink(uint16_t interval)
+void LEDControl::Blink(uint16_t interval)
 {
-    blink_timeout = interval;
+    if (blink_timeout != interval)
+    {
+        blink_timeout = interval;
+    }
 }
 
-void LED::Light()
+void LEDControl::Light()
 {
     blink_timeout = 0l;
     digitalWrite(led_pin, HIGH);
 }
 
-void LED::Dim()
+void LEDControl::Dim()
 {
     blink_timeout = 0l;
     digitalWrite(led_pin, LOW);

@@ -11,7 +11,7 @@
 // MySensors values
 #define STATUS_ID 7
 #define SENSOR_NAME "Pump control"
-#define SENSOR_VERSION "0.9.4"
+#define SENSOR_VERSION "0.9.6"
 
 
 PumpStatus::PumpStatus(const PumpControl& pumpRef) : pump(pumpRef), u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE)
@@ -23,7 +23,7 @@ void PumpStatus::Initialize()
     // Display init
     if (u8g2.begin())
     {
-        u8g2.setFlipMode(1);
+        u8g2.setFlipMode(0);
         ShowStatus(2000);
     }
 }
@@ -35,8 +35,8 @@ void PumpStatus::ShowStatus(uint16_t mseconds)
     char msgTemp[20];
     snprintf_P(msgTemp, 20, PSTR("Found %d TS devices"), sensors.getDeviceCount());
 
-    char msgNode[12];
-    snprintf_P(msgNode, 12, PSTR("Node ID: %d"), getNodeId());
+    char msgNode[24];
+    snprintf_P(msgNode, 24, PSTR("Node/parent ID: %d/%d"), getNodeId(), getParentNodeId());
 
     u8g2.firstPage();
     do
@@ -49,7 +49,8 @@ void PumpStatus::ShowStatus(uint16_t mseconds)
         u8g2.drawStr(0, 48, msgNode);
     } while (u8g2.nextPage());
 
-    delay(mseconds);
+    sendHeartbeat();
+    wait(mseconds);
 }
 
 void PumpStatus::Present()
@@ -63,7 +64,7 @@ void PumpStatus::Present()
 void PumpStatus::DisplayStatus()
 {
     char msgTime[24], msgTemp[20];
-    snprintf_P(msgTime, 24, PSTR("Last run: %d:%02d"), pump.GetLastRuntime() / 60, pump.GetLastRuntime() % 60);
+    snprintf_P(msgTime, 24, PSTR("Last run : %d:%02d"), pump.GetLastRuntime() / 60, pump.GetLastRuntime() % 60);
     char tempVal[6];
     dtostrf(pump.GetPumpTemp(), 4, 1, tempVal);
     snprintf_P(msgTemp, 20, PSTR("Pump temp: %s"), tempVal);

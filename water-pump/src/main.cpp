@@ -2,7 +2,6 @@
 #include "loop-call.h"
 // Bounce2
 #include <Bounce2.h>
-#include "LED.h"
 // Pump control
 #include "PumpControl.h"
 #include "PumpStatus.h"
@@ -15,10 +14,10 @@
 // Button bounce
 Bounce button = Bounce();
 
-LED btnLed(BUTTON_LED_PIN);
+LEDControl btnLed(BUTTON_LED_PIN);
 
 // Pump control class
-PumpControl pump(PRESSURE_SENSOR_PIN, PUMP_CONTROL_PIN);
+PumpControl pump(btnLed, PRESSURE_SENSOR_PIN, PUMP_CONTROL_PIN);
 PumpStatus pumpStatus(pump);
 
 void setup() 
@@ -27,7 +26,7 @@ void setup()
     button.attach(CONFIRM_BUTTON_PIN, INPUT_PULLUP);
     button.interval(25);
 
-    pump.Initialize(&pumpStatus, btnLed);
+    pump.Initialize(&pumpStatus);
     // Display init status
     pumpStatus.Initialize();
 }
@@ -39,7 +38,7 @@ void presentation()
 
 void pump_status_and_update()
 {
-    auto state = pump.CheckStateLoop();
+    pump.CheckStateLoop();
     pumpStatus.Update();
 }
 

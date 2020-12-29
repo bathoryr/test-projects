@@ -6,22 +6,25 @@
 
 // Maximum run time of the pump: 5 minutes 
 unsigned long PumpControl::MAX_RUNTIME = 5ul * 60 * 1000;
-uint8_t PumpControl::MAX_TEMP_PUMP = 30;
+// Maximum temperature of the pump
+uint8_t PumpControl::MAX_TEMP_PUMP = 27;
+// Max. temperature of the solid state relay
 uint8_t PumpControl::MAX_TEMP_SSR = 50;
+// ID of sensor on the pump
 uint8_t PumpControl::SENSOR_PUMP_ID = 0;
+// ID of sensor on the SSR
 uint8_t PumpControl::SENSOR_SSR_ID = 1;
 
-PumpControl::PumpControl(uint8_t pressure_pin, uint8_t pump_pin) : 
-    m_oneWire(ONE_WIRE_BUS), m_sensors(&m_oneWire),
+PumpControl::PumpControl(LEDControl& led, uint8_t pressure_pin, uint8_t pump_pin) : 
+    m_oneWire(ONE_WIRE_BUS), m_sensors(&m_oneWire), btnLed(led), 
     m_state(PumpControl::PumpState::NOT_INITIALIZED), m_pressure_sensor_pin(pressure_pin),
     m_pump_control_pin(pump_pin), m_lastRuntime(0)
 {
 }
 
-void PumpControl::Initialize(PumpStatus* pumpStatus, LED& led)
+void PumpControl::Initialize(PumpStatus* pumpStatus)
 {
     m_pumpStatus = pumpStatus;
-    this->led = led;
     pinMode(m_pressure_sensor_pin, INPUT_PULLUP);
     pinMode(m_pump_control_pin, OUTPUT);
 
@@ -43,13 +46,12 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
     switch (m_state)
     {
         case PumpState::READY:
-            led.Dim();
             if (CheckLowPressure() == true)
             {
                 if (CheckSensors())
                 {
                     StartPump();
-                    m_state = PumpState::START;
+                    SetStartState();
                 }
                 else
                 {
@@ -67,7 +69,7 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
             if (CheckLowPressure() == false)
             {
                 StopPump();
-                m_state = PumpState::READY;
+                SetReadyState();
                 // Everything went OK, reset message
                 m_message = F("OK");
                 break;
@@ -79,7 +81,6 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
             }
             break;
         case PumpState::MANUAL_STOP:
-            led.Blink(500);
             if (CheckButtonPressed())
             {
                 m_message = F("Confirm button pressed");
@@ -97,11 +98,19 @@ void PumpControl::SetManualState()
 {
     m_confirm_btn_pressed = false;
     m_state = PumpState::MANUAL_STOP;
+    btnLed.Blink(250);
 }
 
 void PumpControl::SetReadyState()
 {
     m_state = PumpState::READY;
+    btnLed.Dim();
+}
+
+void PumpControl::SetStartState()
+{
+    m_state = PumpState::START;
+    btnLed.Light();
 }
 
 void PumpControl::StartPump()
@@ -143,13 +152,13 @@ bool PumpControl::CheckTemperature()
     m_sensors.requestTemperatures();
     if (m_sensors.getTempCByIndex(SENSOR_PUMP_ID) > MAX_TEMP_PUMP)
     {
-        m_message = F("Pump temp.: ");
+        m_message = F("Pump temp: ");
         m_message.concat(m_sensors.getTempCByIndex(SENSOR_PUMP_ID));
         result = false;
     }
     if (m_sensors.getTempCByIndex(SENSOR_SSR_ID) > MAX_TEMP_SSR)
     {
-        m_message = F("SSR temp.: ");
+        m_message = F("SSR temp: ");
         m_message.concat(m_sensors.getTempCByIndex(SENSOR_SSR_ID));
         result = false;
     }
