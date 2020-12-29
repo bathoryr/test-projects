@@ -2,6 +2,7 @@
 // Temperature sensors
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include "LED.h"
 
 class PumpStatus;
 
@@ -10,7 +11,7 @@ class PumpControl
     public:
         enum class PumpState {NOT_INITIALIZED, READY, START, MANUAL_STOP};
         PumpControl(uint8_t pressure_pin, uint8_t pump_pin);
-        void Initialize(PumpStatus* pumpStatus);
+        void Initialize(PumpStatus* pumpStatus, LED& led);
         PumpState CheckStateLoop();
         PumpState GetState() const;
         String GetStateText() const;
@@ -26,6 +27,7 @@ class PumpControl
         DallasTemperature m_sensors;
         PumpState m_state;
         PumpStatus* m_pumpStatus;
+        LED& led;
         uint8_t m_pressure_sensor_pin;
         uint8_t m_pump_control_pin;
         uint8_t m_confirm_button_pin;

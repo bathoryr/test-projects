@@ -18,9 +18,10 @@ PumpControl::PumpControl(uint8_t pressure_pin, uint8_t pump_pin) :
 {
 }
 
-void PumpControl::Initialize(PumpStatus* pumpStatus)
+void PumpControl::Initialize(PumpStatus* pumpStatus, LED& led)
 {
     m_pumpStatus = pumpStatus;
+    this->led = led;
     pinMode(m_pressure_sensor_pin, INPUT_PULLUP);
     pinMode(m_pump_control_pin, OUTPUT);
 
@@ -42,6 +43,7 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
     switch (m_state)
     {
         case PumpState::READY:
+            led.Dim();
             if (CheckLowPressure() == true)
             {
                 if (CheckSensors())
@@ -77,6 +79,7 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
             }
             break;
         case PumpState::MANUAL_STOP:
+            led.Blink(500);
             if (CheckButtonPressed())
             {
                 m_message = F("Confirm button pressed");
