@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name LEDLight-rescue)(type Legacy)(uri ${KIPRJMOD}/LEDLight-rescue.lib)(options "")(descr ""))
+)
