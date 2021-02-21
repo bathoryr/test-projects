@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-// Sensor config: MYSBootloader, 16MHz Xtal
+// Sensor config: MYSBootloader, 16MHz Xtal, Nano board
 
 //#define MY_DEBUG
 //#define MY_DEBUG_VERBOSE_RF24
@@ -9,31 +9,35 @@
 #define MY_RADIO_RF24
 #define MY_RF24_PA_LEVEL (RF24_PA_MAX)
 #define MY_NODE_ID 5
-#include <MyConfig.h>
 #include <MySensors.h>
 
 #define OUTPUT_PIN 5
-#define MOTION_LED 7 // Move indication LED
-#define MOTION_PIN 4
+#define MOTION_LED 7 	// Move indication LED
+#define MOTION_PIN 4	// PIR sensor
+#define RFCOMM_PIN 2	// RF433 transmitter
 
 #define CHILD_ID_LIGHT 1
 #define CHILD_ID_MOTION 2
 #define CHILD_ID_LUX 3
 #define CHILD_ID_TIMEOUT 4
 #define CHILD_ID_MOVE_DETECT 5
+#define CHILD_ID_DOORBELL 9
 #define CHILD_ID_INFO 99
 
 #include "loop-call.h"
 #include "Light.h"
+#include "doorbell.h"
 
 void CheckMotion();
 void SendIllumination();
 
 Light light;
+Doorbell doorbell;
 
 void setup()
 {
 	light.Setup();
+	doorbell.Initialize(RFCOMM_PIN);
 	pinMode(OUTPUT_PIN, OUTPUT);
 	pinMode(MOTION_LED, OUTPUT);
 	pinMode(MOTION_PIN, INPUT);
@@ -53,6 +57,7 @@ void presentation()
 	present(CHILD_ID_LUX, S_LIGHT_LEVEL, "Illumination level");
 	present(CHILD_ID_TIMEOUT, S_SOUND, "Light timeout");
 	present(CHILD_ID_MOVE_DETECT, S_BINARY, "Move detect switch");
+	present(CHILD_ID_DOORBELL, S_BINARY, "Doorbell control");
 #ifdef MY_DEBUG
 	present(CHILD_ID_INFO, S_INFO, "Text info");
 #endif
@@ -125,6 +130,12 @@ void receive(const MyMessage &message)
 			String s = "Got V_STATUS msg: ";
 			send(msg.set((s += message.getBool() ? "ON" : "OFF").c_str()));
 #endif
+		}
+		break;
+	case CHILD_ID_DOORBELL:
+		if (message.type == V_STATUS)
+		{
+			doorbell.Ring();
 		}
 		break;
 	}
