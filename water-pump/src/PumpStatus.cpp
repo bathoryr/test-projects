@@ -5,13 +5,14 @@
 #define MY_RADIO_RF24
 #define MY_RF24_PA_LEVEL RF24_PA_MAX
 #define MY_SPLASH_SCREEN_DISABLED
+#define MY_TRANSPORT_WAIT_READY_MS 5000
 #include <MySensors.h>
 #include "PumpStatus.h"
 
 // MySensors values
 #define STATUS_ID 7
 #define SENSOR_NAME "Pump control"
-#define SENSOR_VERSION "0.9.6"
+#define SENSOR_VERSION "0.9.7"
 
 
 PumpStatus::PumpStatus(const PumpControl& pumpRef) : pump(pumpRef), u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE)

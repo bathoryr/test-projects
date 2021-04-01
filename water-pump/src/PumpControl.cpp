@@ -63,9 +63,15 @@ PumpControl::PumpState PumpControl::CheckStateLoop()
                 CheckSensors();
                 m_pumpStatus->ShowStatus(5000);
             }
-            
             break;
         case PumpState::START:
+            if (CheckButtonPressed())
+            {
+                m_message = F("Stop button pressed");
+                StopPump();
+                SetManualState();
+                break;
+            }
             if (CheckLowPressure() == false)
             {
                 StopPump();
@@ -170,7 +176,7 @@ bool PumpControl::CheckRuntime()
     m_lastRuntime = (millis() - m_startTime) / 1000;
     if (millis() - m_startTime > MAX_RUNTIME)
     {
-        m_message = F("Max. runtime: ");
+        m_message = F("Max.runtime:");
         m_message.concat(m_lastRuntime);
         m_message.concat(" s");
         return false;
