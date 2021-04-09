@@ -8,9 +8,9 @@
 #include <MyConfig.h>
 #include <MySensors.h>  
 
+#define VERSION			"1.1"
 #define PIN_BUTTON_1	2
 #define PIN_BUTTON_2	3
-#define ID_VOLTAGE		9
 
 const long InternalReferenceVoltage = 1084;  // Adjust this value to your board's specific internal BG voltage
 static const float VMIN = 1.8, VMAX = 3.2;
@@ -23,9 +23,9 @@ float getBandgap();
 
 void presentation() 
 {
-	sendSketchInfo("Doorbell buttons", "1.0");
-	present(PIN_BUTTON_1, S_DOOR, "Doorbell button 1");
-	present(PIN_BUTTON_2, S_DOOR, "Doorbell button 2");
+	sendSketchInfo("Doorbell buttons", VERSION);
+	present(PIN_BUTTON_1, S_DOOR, "Button 1");
+	present(PIN_BUTTON_2, S_DOOR, "Button 2");
 }
 
 void setup() 
@@ -68,12 +68,13 @@ void loop()
 		Serial.println("Sleep timeout");
 #endif
 		sendBatteryMsg();
+		sendHeartbeat();
 	}
 }
 
 void receive(const MyMessage& msg)
 {
-	if (msg.isAck())
+	if (msg.isEcho())
 	{ 
 		msgAck = true;
 #ifdef MY_DEBUG
@@ -96,10 +97,6 @@ void sendBatteryMsg()
 	}
 	else
 	{
-		/*
-		MyMessage msgVolt(ID_VOLTAGE, V_VOLTAGE);
-		send(msgVolt.set(volt, 2));
-		*/
 		// Send on VAR1 channel
 		MyMessage msgVar1(PIN_BUTTON_1, V_VAR1);
 		send(msgVar1.set(volt, 2));
@@ -116,8 +113,7 @@ float getBandgap()
 	ADMUX = bit(REFS0) | bit(MUX3) | bit(MUX2) | bit(MUX1);
 	ADCSRA |= bit(ADSC);  // start conversion
 	while (ADCSRA & bit(ADSC))
-	{
-	}  // wait for conversion to complete
+	{}  // wait for conversion to complete
 	float result = (float)(((InternalReferenceVoltage * 1024) / ADC) + 5) / 1000;
 	return result;
 } // end of getBandgap
