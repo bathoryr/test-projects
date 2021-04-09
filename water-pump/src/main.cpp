@@ -24,7 +24,7 @@ void setup()
 {
     // Bounce button
     button.attach(CONFIRM_BUTTON_PIN, INPUT_PULLUP);
-    button.interval(25);
+    button.interval(10);
 
     pump.Initialize(&pumpStatus);
     // Display init status

@@ -4,10 +4,10 @@
 #define ONE_WIRE_BUS 5
 #define TEMPERATURE_PRECISION 9
 
-// Maximum run time of the pump: 5 minutes 
-unsigned long PumpControl::MAX_RUNTIME = 5ul * 60 * 1000;
+// Maximum run time of the pump: 10 minutes 
+unsigned long PumpControl::MAX_RUNTIME = 10ul * 60 * 1000;
 // Maximum temperature of the pump
-uint8_t PumpControl::MAX_TEMP_PUMP = 27;
+uint8_t PumpControl::MAX_TEMP_PUMP = 25;
 // Max. temperature of the solid state relay
 uint8_t PumpControl::MAX_TEMP_SSR = 50;
 // ID of sensor on the pump
