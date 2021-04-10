@@ -1,4 +1,5 @@
-/*  Button sensor (max. 2 buttons)
+/*  Button sensor 
+	There is output for LED instead of seconf input button. Not used yet.
 	1 MHz int, Optiboot
 */
 //#define MY_DEBUG
