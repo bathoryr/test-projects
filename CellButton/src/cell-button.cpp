@@ -13,7 +13,7 @@
 #define PIN_BUTTON_2	3
 
 const long InternalReferenceVoltage = 1084;  // Adjust this value to your board's specific internal BG voltage
-static const float VMIN = 1.8, VMAX = 3.2;
+static const float VMIN = 2.2, VMAX = 3.2;
 
 MyMessage msgBtn(PIN_BUTTON_1, V_TRIPPED);
 bool msgAck;
