@@ -7,9 +7,9 @@
 class Light 
 {
 public:
-    Light() {
+    Light() : motionDetectActive(true), lightState(false)
+    {
         lightLevels = new buffer<unsigned int>(60); 
-        lightState = false;
         timerLight = millis();
 	}
 

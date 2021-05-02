@@ -9,6 +9,11 @@
 #define MY_RADIO_RF24
 #define MY_RF24_PA_LEVEL (RF24_PA_MAX)
 #define MY_NODE_ID 5
+//#define MY_TRANSPORT_WAIT_READY_MS 5000
+
+// #define MY_RF24_DATARATE RF24_2MBPS
+// #define MY_RF24_CHANNEL (0x70)
+
 #include <MySensors.h>
 
 #define OUTPUT_PIN 5
@@ -37,7 +42,7 @@ Doorbell doorbell;
 void setup()
 {
 	light.Setup();
-	doorbell.Initialize(RFCOMM_PIN);
+	//doorbell.Initialize(RFCOMM_PIN);
 	pinMode(OUTPUT_PIN, OUTPUT);
 	pinMode(MOTION_LED, OUTPUT);
 	pinMode(MOTION_PIN, INPUT);
@@ -50,7 +55,7 @@ void setup()
 
 void presentation()
 {
-	sendSketchInfo("Dimmable Light", "3.1.1");
+	sendSketchInfo("Dimmable Light", "3.1.2");
 
 	present(CHILD_ID_LIGHT, S_DIMMER, "Light control");
 	present(CHILD_ID_MOTION, S_MOTION, "Motion activity");

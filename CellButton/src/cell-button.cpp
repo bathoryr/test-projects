@@ -1,22 +1,32 @@
 /*  Button sensor (max. 2 buttons)
 	1 MHz int, Optiboot
+	Channels: VAR1: battery voltage
+			  VAR2: click event (2=double click, 3=long click)
 */
 //#define MY_DEBUG
 #define MY_RADIO_RF24
-//#define RF24_PA_MAX
+#define MY_RF24_PA_LEVEL RF24_PA_MAX
+#define MY_SPLASH_SCREEN_DISABLED
+//#define MY_TRANSPORT_WAIT_READY_MS 10000
+//#define MY_RF24_DATARATE RF24_2MBPS
+//#define MY_RF24_CHANNEL (0x70)
 #define MY_BAUD_RATE 9600
 #include <MyConfig.h>
 #include <MySensors.h>  
+#include <PinButton.h>
 
-#define VERSION			"1.1"
+#define VERSION			"1.2.1"
 #define PIN_BUTTON_1	2
 #define PIN_BUTTON_2	3
 
 const long InternalReferenceVoltage = 1084;  // Adjust this value to your board's specific internal BG voltage
-static const float VMIN = 2.2, VMAX = 3.2;
+static const float VMIN = 2.0, VMAX = 3.2;
 
 MyMessage msgBtn(PIN_BUTTON_1, V_TRIPPED);
 bool msgAck;
+const int8_t MAX_BUTTONS = 2;
+PinButton<250, 2000> buttons[MAX_BUTTONS] = {2, 3};
+
 // Forward declarations
 void sendBatteryMsg();
 float getBandgap();
@@ -38,37 +48,66 @@ void setup()
 	sendBatteryMsg();
 }
 
-void loop() 
+void send_message(int8_t sensor, mysensors_data_t type, uint8_t val)
 {
-	int8_t btn = sleep(0, CHANGE, 1, CHANGE, 3600000);
-	if (btn >= 0) {
-		delay(20);
-		msgBtn.sensor = PIN_BUTTON_1 + btn;
-		msgAck = false;
-		for (uint8_t i = 0; msgAck == false && i < 3; i++)
-		{
-#ifdef MY_DEBUG
-			if (i > 0)
-			{
-				Serial.println("Send retry...");
-			}
-			unsigned long t = millis();
-#endif
-			send(msgBtn.set(digitalRead(PIN_BUTTON_1 + btn) == LOW), true);
-			wait(500, C_SET, V_TRIPPED);
-#ifdef MY_DEBUG
-			Serial.print("Wait took ");
-			Serial.println(millis() - t);
-#endif
-		}
-	}
-	else
+	MyMessage msg(sensor, type);
+	msgAck = false;
+	for (uint8_t i = 0; msgAck == false && i < 3; i++)
 	{
 #ifdef MY_DEBUG
-		Serial.println("Sleep timeout");
+		if (i > 0)
+		{
+			Serial.println("Send retry...");
+		}
+		unsigned long t = millis();
 #endif
-		sendBatteryMsg();
-		sendHeartbeat();
+		send(msg.set(val), true);
+		wait(500, C_SET);
+#ifdef MY_DEBUG
+		Serial.print("Wait took ");
+		Serial.println(millis() - t);
+#endif
+	}
+}
+
+unsigned long wakeup_time = 0ul;
+
+void loop()
+{
+	if (millis() - wakeup_time > 3000)
+	{
+		int8_t btn = sleep(0, CHANGE, 1, CHANGE, 3600000);
+		if (btn > MY_WAKE_UP_BY_TIMER)
+		{
+			wakeup_time = millis();
+		}
+		else
+		{
+			sendHeartbeat();
+			sendBatteryMsg();
+		}
+	}
+	for (auto& b : buttons)
+	{
+		b.update();
+		if (b.isClick())
+		{
+			send_message(b.getPin(), mysensors_data_t::V_TRIPPED, 1);
+		}
+		if (b.isReleased())
+		{
+			send_message(b.getPin(), mysensors_data_t::V_TRIPPED, 0);
+		}
+		if (b.isDoubleClick())
+		{
+			send_message(b.getPin(), mysensors_data_t::V_VAR2, 2);
+		}
+		if (b.isLongClick())
+		{
+			send_message(b.getPin(), mysensors_data_t::V_VAR2, 3);
+			presentation();
+			sendBatteryMsg();
+		}
 	}
 }
 
