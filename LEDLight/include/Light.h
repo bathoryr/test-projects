@@ -7,7 +7,7 @@
 class Light 
 {
 public:
-    Light() : motionDetectActive(true), lightState(false)
+    Light() : lightState(false),  motionDetectActive(true)
     {
         lightLevels = new buffer<unsigned int>(60); 
         timerLight = millis();
@@ -20,7 +20,7 @@ public:
     void Setup() {
       // MUST be called from setup() function, not from the constructor, else node won't boot
 	  Wire.begin();
-	  lightSensor.begin(BH1750::CONTINUOUS_HIGH_RES_MODE);
+	  bh_state = lightSensor.begin(BH1750::CONTINUOUS_HIGH_RES_MODE);
 	}
 	
     bool IsLightOn() {
@@ -44,16 +44,16 @@ public:
     void TurnOff() {
         digitalWrite(OUTPUT_PIN, LOW);
         lightState = false;
-        MyMessage switchMsg(CHILD_ID_LIGHT, V_STATUS);
-        send(switchMsg.set(false));
+        // MyMessage switchMsg(CHILD_ID_LIGHT, V_STATUS);
+        // send(switchMsg.set(false));
     }
 
     void TurnOn() {
         analogWrite(OUTPUT_PIN, lightIntensity);
         lightState = true;
         ResetTimer();
-        MyMessage switchMsg(CHILD_ID_LIGHT, V_STATUS);
-        send(switchMsg.set(true));
+        // MyMessage switchMsg(CHILD_ID_LIGHT, V_STATUS);
+        // send(switchMsg.set(true));
     }
 
     void SetIntensity(int percent) {
@@ -61,8 +61,8 @@ public:
         if (IsLightOn()) {
             analogWrite(OUTPUT_PIN, lightIntensity);
         }
-        MyMessage msg(CHILD_ID_LIGHT, V_DIMMER);
-        send(msg.set(percent));
+        // MyMessage msg(CHILD_ID_LIGHT, V_DIMMER);
+        // send(msg.set(percent));
     }
 
     void SetMotionDetector(bool active = true) {
@@ -77,8 +77,9 @@ public:
         return (GetAvgIllumination() < lux);
     }
 
-    float GetIlluminationLevel() {
-        return lightSensor.readLightLevel();
+    float GetIlluminationLevel() 
+    {
+        return bh_state ? lightSensor.readLightLevel() : 0.0;
     }
 
     unsigned int GetAvgIllumination() {
@@ -107,7 +108,7 @@ public:
         }
     }
 
-protected:
+private:
 	bool lightState;
 	unsigned long timerLight;
 	bool motionDetectActive;
@@ -116,6 +117,7 @@ protected:
 	unsigned int lightTimeout = 10;
 	int lightIntensity = 50;
 	BH1750 lightSensor;
+    bool bh_state;
 	buffer<unsigned int> *lightLevels;
 
 	inline void ResetTimer() {

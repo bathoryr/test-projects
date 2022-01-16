@@ -18,6 +18,9 @@
 		},
 		{
 			"path": "rf24scanner"
+		},
+		{
+			"path": "TempHumSensor"
 		}
 	],
 	"settings": {}
